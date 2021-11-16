@@ -4,6 +4,8 @@ import pandas as pd
 import math
 import csv
 dataPoints = []
+
+type = 'classifier'
 for k in range(1, 111):
     print(k)
     try:
@@ -18,10 +20,14 @@ for k in range(1, 111):
         for j in range(i-5, i):
             row = df.iloc[j, 1:].tolist()
             currentPoint += row
-        currentPoint += [currentRow[0], currentRow[3]]
+        if (type is 'classifier'):
+            currentPoint += [currentRow[0],
+                             (1 if currentRow[3] > currentRow[0] else -1)]
+        elif(type is 'linear'):
+            currentPoint += [currentRow[0], currentRow[3]]
         currentPoint = [6.2 if math.isnan(x) else x for x in currentPoint]
         dataPoints.append(currentPoint)
 
-with open("ParsedData/Data.csv", "w", newline='') as f:
+with open("ParsedData/DataClassifier.csv", "w", newline='') as f:
     writer = csv.writer(f)
     writer.writerows(dataPoints)
