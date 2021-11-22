@@ -1,4 +1,5 @@
 from file_reader import read_classifier
+from utils import KFold_validate
 from sklearn.linear_model import LogisticRegression
 import numpy as np
 from sklearn.dummy import DummyClassifier
