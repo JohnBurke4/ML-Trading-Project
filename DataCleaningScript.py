@@ -5,10 +5,10 @@ import math
 import csv
 dataPoints = []
 
-type = 'classifier'
+type = 'linear'
 
-totalDays = 2
-for days in range(2, 6):
+totalDays = 3
+for days in range(1, totalDays):
     print("Day: ", days)
     dataPoints = []
     for files in range(1, 111):
@@ -25,10 +25,10 @@ for days in range(2, 6):
             for j in range(i-days, i):
                 row = df.iloc[j, 1:].tolist()
                 currentPoint += row
-            if (type is 'classifier'):
+            if (type == 'classifier'):
                 currentPoint += [currentRow[0],
-                                (1 if currentRow[3] > currentRow[0] else -1)]
-            elif(type is 'linear'):
+                                 (1 if currentRow[3] > currentRow[0] else -1)]
+            elif(type == 'linear'):
                 currentPoint += [currentRow[0], currentRow[3]]
             currentPoint = [6.2 if math.isnan(x) else x for x in currentPoint]
             dataPoints.append(currentPoint)
@@ -36,5 +36,3 @@ for days in range(2, 6):
     with open("ParsedData/DataClassifier{}Days.csv".format(days), "w", newline='') as f:
         writer = csv.writer(f)
         writer.writerows(dataPoints)
-
-
