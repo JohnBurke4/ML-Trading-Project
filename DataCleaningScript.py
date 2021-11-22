@@ -5,21 +5,24 @@ import math
 import csv
 dataPoints = []
 
-type = 'linear'
-
-totalDays = 3
-for days in range(1, totalDays):
+type = 'classifier'
+numberOfTestDays = 10
+totalDays = 10
+for days in range(3, totalDays):
     print("Day: ", days)
     dataPoints = []
+    testPoints = []
     for files in range(1, 111):
         print("File: ", files)
         try:
-            df = pd.read_csv("Data/Data{}.csv".format(days), header=1)
+            df = pd.read_csv("Data/Data{}.csv".format(files), header=1)
 
         except:
+            print("Cannot find file: ", "Data/Data{}.csv".format(files))
             continue
-
+        count = 0
         for i in range(len(df)-1, days, -1):
+
             currentPoint = []
             currentRow = df.iloc[i, 1:].tolist()
             for j in range(i-days, i):
@@ -31,8 +34,16 @@ for days in range(1, totalDays):
             elif(type == 'linear'):
                 currentPoint += [currentRow[0], currentRow[3]]
             currentPoint = [6.2 if math.isnan(x) else x for x in currentPoint]
-            dataPoints.append(currentPoint)
+            if (count < numberOfTestDays):
+                testPoints.append(currentPoint)
+            else:
+                dataPoints.append(currentPoint)
+            count += 1
 
-    with open("ParsedData/DataClassifier{}Days.csv".format(days), "w", newline='') as f:
+    with open("ParsedData/DataClassifierTrain{}Days.csv".format(days), "w", newline='') as f:
         writer = csv.writer(f)
         writer.writerows(dataPoints)
+
+    with open("ParsedData/DataClassifierTest{}Days.csv".format(days), "w", newline='') as f:
+        writer = csv.writer(f)
+        writer.writerows(testPoints)
