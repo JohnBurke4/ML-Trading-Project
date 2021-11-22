@@ -3,8 +3,13 @@ from sklearn.linear_model import LogisticRegression
 import numpy as np
 from sklearn.dummy import DummyClassifier
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import PolynomialFeatures
 
-(X, y) = read_classifier()
+filename = 'dataClassifier2Days.csv'
+(X, y) = read_classifier(filename=filename)
+poly = PolynomialFeatures(2)
+X = poly.fit_transform(X)
+
 X_train, X_test, y_train, y_test = train_test_split(X, y)
 model = LogisticRegression(
     penalty='none', solver='lbfgs', max_iter=1000).fit(X_train, y_train)

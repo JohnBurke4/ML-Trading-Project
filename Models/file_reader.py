@@ -8,8 +8,9 @@ def read_regression():
     return (X, y)
 
 
-def read_classifier():
-    df = pd.read_csv(f"../ParsedData/DataClassifier.csv", header=None)
-    X = df.iloc[:, 0:66]
-    y = df.iloc[:, 66]
+def read_classifier(filename="DataClassifier.csv"):
+    df = pd.read_csv(f"../ParsedData/{filename}", header=None)
+    cols = df.shape[1]
+    X = df.iloc[:, 0:(cols-2)]
+    y = df.iloc[:, (cols-1)]
     return (X, y)
