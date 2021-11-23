@@ -4,11 +4,14 @@ import numpy as np
 from sklearn.dummy import DummyRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import PolynomialFeatures
+
+
 def cToAlpha(c):
     return 1/(2*c)
 
+
 C = 1
-filename = 'dataClassifier2Days.csv'
+filename = 'dataClassifierTrain5Days.csv'
 (X, y) = read_regression()
 
 
