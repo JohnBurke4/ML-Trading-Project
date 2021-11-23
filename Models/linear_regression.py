@@ -5,7 +5,7 @@ import pandas as pd
 from sklearn.dummy import DummyRegressor
 from sklearn.model_selection import train_test_split
 
-(X, y) = read_regression()
+(X, y) = read_regression(n_days=2)
 X_train, X_test, y_train, y_test = train_test_split(X, y)
 model = LinearRegression().fit(X_train, y_train)
 dummy = DummyRegressor().fit(X_train, y_train)

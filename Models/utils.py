@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 def cToAlpha(c):
     return 1 / (2*c)
 
-def KFold_validate(model, dummy, X, y):
-    mean_error=[]
+def KFold_validate_logistic(model, dummy, X, y):
+    auc_mean=[]
     std_error=[]
     kf = KFold(n_splits=5)
     temp = []
@@ -20,8 +20,10 @@ def KFold_validate(model, dummy, X, y):
         ypred_dummy = dummy.predict(X[test])
         temp.append(roc_auc_score(y[test], ypred))
         temp1.append(roc_auc_score(y[test], ypred_dummy))
-    mean_error.append(np.array(temp).mean())
+    auc_mean.append(np.array(temp).mean())
     std_error.append(np.array(temp).std())
-    mean_error.append(np.array(temp1).mean())
+    auc_mean.append(np.array(temp1).mean())
     std_error.append(np.array(temp1).std())
-    return (mean_error, std_error)
+    print(f"AUC Classifier: {auc_mean[0]}, Std Deviation Classifier {std_error[0]}\n" +
+        f"AUC Dummy: {auc_mean[1]}, Std Deviation Dummy {std_error[1]}")
+    return (auc_mean, std_error)

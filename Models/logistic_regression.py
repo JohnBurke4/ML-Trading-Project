@@ -1,5 +1,5 @@
 from file_reader import read_classifier
-from utils import KFold_validate
+from utils import KFold_validate_logistic
 from sklearn.linear_model import LogisticRegression
 import numpy as np
 from sklearn.dummy import DummyClassifier
@@ -8,28 +8,22 @@ from sklearn.preprocessing import PolynomialFeatures
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import KFold
 
+days = 2
 numberOfStocks = 500
 
-days = 2
-filename = f'dataClassifierTrain{days}Days.csv'
-testFilename = f'dataClassifierTest{days}Days.csv'
-
-(X, y) = read_classifier(filename=filename)
-(X_test, y_test) = read_classifier(filename=testFilename)
-
+(X, y) = read_classifier(n_days=days)
 poly = PolynomialFeatures(1)
 X = poly.fit_transform(X)
-X_test = poly.fit_transform(X_test)
+_, X_test, _, _ = train_test_split(X, y)
 
-#X_train, X_test, y_train, y_test = train_test_split(X, y)
 model = LogisticRegression(
-    penalty='none', solver='lbfgs', max_iter=1000).fit(X, y)
-dummy = DummyClassifier().fit(X, y)
-print("LogisticRegression: ", model.score(X_test, y_test))
-print("DummyClassifier: ", dummy.score(X_test, y_test))
+    penalty='none', solver='lbfgs', max_iter=10000)
+dummy = DummyClassifier()
+KFold_validate_logistic(model, dummy, X, y)
 
 
-def makeMoney(model, dummyModel, X, cash=10000):
+
+def makeMoney(model, dummy, X, cash=10000):
     stockCount = 0
     dummyCash = cash
     dummyStockCount = 0
@@ -79,6 +73,5 @@ def makeMoney(model, dummyModel, X, cash=10000):
     print("Dummy's Money: ", dummyCash)
     print(proba)
     print(index)
-
 
 makeMoney(model, dummy, X_test, cash=1000)
