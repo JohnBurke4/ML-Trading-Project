@@ -1,6 +1,6 @@
 from sklearn.model_selection import KFold
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error, f1_score, roc_auc_score
+from sklearn.metrics import mean_squared_error, f1_score, roc_auc_score, roc_curve
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -27,3 +27,13 @@ def KFold_validate_logistic(model, dummy, X, y):
     print(f"AUC Classifier: {auc_mean[0]}, Std Deviation Classifier {std_error[0]}\n" +
         f"AUC Dummy: {auc_mean[1]}, Std Deviation Dummy {std_error[1]}")
     return (auc_mean, std_error)
+
+def show_AUC_curve(models, labels, X_test, y_test):
+    for model in models:
+        fpr, tpr, _ = roc_curve(y_test,model.predict_proba(X_test)[:,1])
+        plt.plot(fpr,tpr)
+    plt.xlabel('False positive rate')
+    plt.ylabel('True positive rate')
+    plt.plot([0, 1], [0, 1], color='green',linestyle='--')
+    plt.legend(labels)
+    plt.show()

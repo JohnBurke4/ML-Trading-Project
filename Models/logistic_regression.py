@@ -1,5 +1,5 @@
 from file_reader import read_classifier
-from utils import KFold_validate_logistic
+from utils import KFold_validate_logistic, show_AUC_curve
 from sklearn.linear_model import LogisticRegression
 import numpy as np
 from sklearn.dummy import DummyClassifier
@@ -8,19 +8,19 @@ from sklearn.preprocessing import PolynomialFeatures
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import KFold
 
-days = 2
+days = 5
 numberOfStocks = 500
 
 (X, y) = read_classifier(n_days=days)
 poly = PolynomialFeatures(1)
 X = poly.fit_transform(X)
-_, X_test, _, _ = train_test_split(X, y)
+_, X_test, _, y_test = train_test_split(X, y)
 
 model = LogisticRegression(
     penalty='none', solver='lbfgs', max_iter=10000)
 dummy = DummyClassifier()
 KFold_validate_logistic(model, dummy, X, y)
-
+show_AUC_curve([model, dummy], ["Logistic", "Dummy"], X_test, y_test)
 
 
 def makeMoney(model, dummy, X, cash=10000):
@@ -74,4 +74,4 @@ def makeMoney(model, dummy, X, cash=10000):
     print(proba)
     print(index)
 
-makeMoney(model, dummy, X_test, cash=1000)
+#makeMoney(model, dummy, X_test, cash=1000)
