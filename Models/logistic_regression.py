@@ -8,7 +8,7 @@ from sklearn.preprocessing import PolynomialFeatures
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import KFold
 
-days = 5
+days = 2
 numberOfStocks = 500
 
 (X, y) = read_classifier(n_days=days)

@@ -31,6 +31,7 @@ def KFold_validate_logistic(model, dummy, X, y):
 def show_AUC_curve(models, labels, X_test, y_test):
     for model in models:
         fpr, tpr, _ = roc_curve(y_test,model.predict_proba(X_test)[:,1])
+        print(tpr)
         plt.plot(fpr,tpr)
     plt.xlabel('False positive rate')
     plt.ylabel('True positive rate')
