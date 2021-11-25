@@ -89,11 +89,6 @@ def makeMoney(model, dummy, X, cash=10000):
 
 def gamba(model, dummy, X, X_test, cash=10000):
     dummyCash = cash
-    rows = X.shape[0]
-
-    price = 1
-    index = 0
-    #print(X[998, days*13 + 1])
     for x_t in X_test:
         if(x_t == 0):
             continue
