@@ -34,9 +34,9 @@ def cvalues(day):
             temp2 = []
             temp3 = []
             model = LogisticRegression(
-                penalty='l1', solver='liblinear', dual=False,C=c,max_iter=1000)
+                penalty='l1', solver='liblinear', dual=False,C=c,max_iter=10000)
             model1 = LogisticRegression(
-                penalty='l2', solver='lbfgs', dual=False,C=c,max_iter=1000)
+                penalty='l2', solver='lbfgs', dual=False,C=c,max_iter=10000)
             for train, test in kf.split(xpoly):
                 model.fit(xpoly[train], y[train])
                 model1.fit(xpoly[train], y[train])
@@ -130,6 +130,6 @@ def reports(c1,c2,day):
     print(classification_report(ytest,ypred4))
 
 #C optimal value seems to be 1?
-# cvalues(2)
-# aucGraph(1,1,2)
-# reports(1,1,2)
+cvalues(2)
+aucGraph(1,1,2)
+reports(1,1,2)
