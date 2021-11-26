@@ -102,7 +102,7 @@ for i in range(500):
     totalCash += cash
     totalDummyCash += dummyCash
 
-print(totalCash/100, totalDummyCash/100)
+print(totalCash/500, totalDummyCash/500)
 
 
 
