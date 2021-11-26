@@ -4,10 +4,10 @@ import numpy as np
 from sklearn.dummy import DummyClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import PolynomialFeatures
-from sklearn.model_selection import KFold
+from sklearn.model_selection import KFold,ShuffleSplit
 from matplotlib import pyplot as plt
 from sklearn.metrics import auc, confusion_matrix, classification_report, roc_curve
-
+from logistic_regression import gamba
 # Logisitic Regression -- different penalties 
 def cvalues(day):
     q_range = [1,2]
@@ -129,6 +129,7 @@ def reports(c1,c2,day,q):
     print("Baseline predictor: Uniform")
     print(confusion_matrix(ytest,ypred4))
     print(classification_report(ytest,ypred4))
+    return (logModel,logmodel2)
 
 #C optimal value seems to be 1?
 #cvalues(2)
