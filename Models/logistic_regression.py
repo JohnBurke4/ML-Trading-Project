@@ -1,121 +1,137 @@
 from file_reader import read_classifier
-from utils import KFold_validate_logistic, show_AUC_curve, show_confusion_matrix
 from sklearn.linear_model import LogisticRegression
 import numpy as np
 from sklearn.dummy import DummyClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import PolynomialFeatures
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import KFold, ShuffleSplit
-from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import KFold,ShuffleSplit
+from matplotlib import pyplot as plt
+from sklearn.metrics import auc, confusion_matrix, classification_report, roc_curve
+from logistic_regression import gamba
+# Logisitic Regression -- different penalties 
+def cvalues(day):
+    q_range = [1,2]
+    c_range = [1, 10, 100, 1000]
+    days = day
+    (X, y) = read_classifier(n_days=days)
+    dummy = DummyClassifier(strategy="most_frequent")
+    dummy2 = DummyClassifier(strategy="uniform")
+    kf = KFold(n_splits=5)
+    for q in q_range:
+        auc_arr = []
+        std_error = []
+        auc_arr1 = []
+        std_error1 = []
+        auc_arr2 = []
+        std_error2 = []
+        auc_arr3 = []
+        std_error3 = []
+        poly = PolynomialFeatures(q)
+        xpoly = poly.fit_transform(X)
+        for c in c_range:
+            temp = []
+            temp1 = []
+            temp2 = []
+            temp3 = []
+            model = LogisticRegression(
+                penalty='l1', solver='saga', dual=False,C=c,max_iter=10000)
+            model1 = LogisticRegression(
+                penalty='l2', solver='lbfgs', dual=False,C=c,max_iter=10000)
+            for train, test in kf.split(xpoly):
+                model.fit(xpoly[train], y[train])
+                model1.fit(xpoly[train], y[train])
+                dummy.fit(xpoly[train], y[train])
+                dummy2.fit(xpoly[train], y[train])
+                fpr, tpr, _ = roc_curve(
+                    y[test], model.decision_function(xpoly[test]))
+                temp.append(auc(fpr, tpr))
+                fpr, tpr, _ = roc_curve(
+                    y[test], model1.decision_function(xpoly[test]))
+                temp1.append(auc(fpr, tpr))
+                fpr, tpr, _ = roc_curve(
+                    y[test], dummy.predict_proba(xpoly[test])[:,1])
+                temp2.append(auc(fpr, tpr))
+                fpr, tpr, _ = roc_curve(
+                    y[test], dummy2.predict_proba(xpoly[test])[:,1])
+                temp3.append(auc(fpr, tpr))
+            auc_arr.append(np.array(temp).mean())
+            std_error.append(np.array(temp).std())
+            auc_arr1.append(np.array(temp1).mean())
+            std_error1.append(np.array(temp1).std())
+            auc_arr2.append(np.array(temp2).mean())
+            std_error2.append(np.array(temp2).std())
+            auc_arr3.append(np.array(temp3).mean())
+            std_error3.append(np.array(temp3).std())
+        plt.figure(q)
+        plt.errorbar(c_range, auc_arr, yerr=std_error, linewidth=3)
+        plt.errorbar(c_range, auc_arr1, yerr=std_error1, linewidth=3)
+        plt.errorbar(c_range, auc_arr2, yerr=std_error2, linewidth=3)
+        plt.errorbar(c_range, auc_arr3, yerr=std_error3, linewidth=3)
+        tstr = "AUC for C penalty weight for q: " + str(q)
+        plt.title(tstr)
+        plt.xlabel('c')
+        plt.ylabel('AUC Score')
+        plt.legend(['Logistic Regression L1','Logistic Regression L2','Baseline Classifier: Most Frequent','Baseline Classifier: Uniform'])
+    plt.show()
 
-def gamba(model, dummy, X, X_test, cash=10000, size=1, max_days_to_trade=100):
-    X_test = np.sort(X_test)
-    X_test_day = []
-    cap = size
-    temp_arr = []
-    for x_t in X_test:
-        if(x_t < cap):
-            temp_arr.append(x_t)
-        else:
-            cap = cap + size
-            X_test_day.append(temp_arr)
-            temp_arr = [x_t]
-    if(len(temp_arr) > 0):
-        X_test_day.append(temp_arr)
-    
+def aucGraph(c1,c2,day,q):
+    days = day
+    (X, y) = read_classifier(n_days=days)
+    xpoly = PolynomialFeatures(q).fit_transform(X)
+    xtrain, xtest, ytrain, ytest = train_test_split(xpoly, y, test_size=0.2)
+    logModel = LogisticRegression(
+                penalty='l1', solver='saga', dual=False,C=c1,max_iter=10000).fit(xtrain,ytrain)
+    logmodel2 = LogisticRegression(
+                penalty='l2', solver='lbfgs', dual=False,C=c2,max_iter=10000).fit(xtrain,ytrain)
+    ydummy = DummyClassifier(strategy="most_frequent").fit(xtrain,ytrain)
+    ydummy2 = DummyClassifier(strategy="uniform").fit(xtrain,ytrain)
+    fpr, tpr, _ = roc_curve(ytest,logModel.decision_function(xtest))
+    fpr1, tpr1, _ = roc_curve(ytest, logmodel2.decision_function(xtest))
+    y_base_scores = ydummy.predict_proba(xtest)
+    fpr2,tpr2,_ = roc_curve(ytest, y_base_scores[:, 1])
+    y_base_scores = ydummy2.predict_proba(xtest)
+    fpr3,tpr3,_ = roc_curve(ytest, y_base_scores[:, 1])
+    plt.figure(1)
+    plt.title("Postive rate graph")
+    plt.xlabel('False positive rate')
+    plt.ylabel('True positive rate')
+    plt.plot(fpr,tpr,color='red')
+    plt.plot(fpr1,tpr1,color='blue')
+    plt.plot(fpr2,tpr2,color='green',linestyle='--')
+    plt.plot(fpr3,tpr3,color='purple',linestyle='dashdot')
+    plt.legend(['Logistic Regression L1','Logistic Regression L2','Baseline Classifier: Most Frequent','Baseline Classifier: Uniform'])
+    plt.show()
 
-    dummyCash = cash
-    count = 0
-    for x_t in X_test_day:
-        count = count + 1
-        if(count > max_days_to_trade):
-            break
-        index = 0
-        buy = 1
-        em = 0
-        for x_d in x_t:
-            
-            model_proba = model.predict_proba(X[x_d].reshape(1, -1))[0]
-            if(model_proba[0] > em and model_proba[0] > model_proba[1]):
-                index = x_d
-                buy = -1
-                em = model_proba[0]
-            elif(model_proba[0] > em and model_proba[1] > model_proba[0]):
-                index = x_d
-                buy = 1
-                em = model_proba[1]
+def reports(c1,c2,day,q):
+    days = day
+    (X, y) = read_classifier(n_days=days)
+    xpoly = PolynomialFeatures(q).fit_transform(X)
+    xtrain, xtest, ytrain, ytest = train_test_split(xpoly, y, test_size=0.2)
+    logModel = LogisticRegression(
+                penalty='l1', solver='saga', dual=False,C=c1,max_iter=10000).fit(xtrain,ytrain)
+    logmodel2 = LogisticRegression(
+                penalty='l2', solver='lbfgs', dual=False,C=c2,max_iter=10000).fit(xtrain,ytrain)
+    ydummy = DummyClassifier(strategy="most_frequent").fit(xtrain,ytrain)
+    ydummy2 = DummyClassifier(strategy="uniform").fit(xtrain,ytrain)
+    ypred1 = logModel.predict(xtest)
+    ypred2 = logmodel2.predict(xtest)
+    ypred3 = ydummy.predict(xtest)
+    ypred4 = ydummy2.predict(xtest)
+    print("L1 Penalty Logistic Regression")
+    print(confusion_matrix(ytest,ypred1))
+    print(classification_report(ytest,ypred1))
+    print("L2 Penalty Logistic Regression")
+    print(confusion_matrix(ytest,ypred2))
+    print(classification_report(ytest,ypred2))
+    print("Baseline predictor: Most Frequent")
+    print(confusion_matrix(ytest,ypred3))
+    print(classification_report(ytest,ypred3))
+    print("Baseline predictor: Uniform")
+    print(confusion_matrix(ytest,ypred4))
+    print(classification_report(ytest,ypred4))
+    return (logModel,logmodel2)
 
-        if(index < size):
-            continue
-        prediction = buy
-        dummyPrediction = dummy.predict(X[index].reshape(1, -1))[0]
-
-        open_price = X[index, 2]
-        close_price = X[index-size, 6]
-        price_delta = (close_price - open_price) / open_price
-        if (prediction == 1  and cash > 0 ):
-            cash = (price_delta+1) * cash
-        elif (prediction == -1  and cash > 0 ):
-            cash = (1-price_delta) * cash  
-
-        if (dummyPrediction == 1  and cash > 0 ):
-            dummyCash = (price_delta+1) * dummyCash 
-        elif (dummyPrediction == -1  and cash > 0 ):
-            dummyCash = (1-price_delta) * dummyCash   
-
-
-    return (cash, dummyCash)
-
-def run_regression(X, y, sz):
-
-    poly = PolynomialFeatures(1)
-    X = poly.fit_transform(X)
-    sss = ShuffleSplit(n_splits=1, test_size=0.2)
-
-    data_size = X.shape[0]
-    cols = X.shape
-    X_indices = np.reshape(np.random.rand(data_size*2),(data_size,2))
-    y_indices = np.random.randint(2, size=data_size)
-
-    sss.get_n_splits(X, y)
-    train_index, test_index = next(sss.split(X_indices, y_indices)) 
-
-    X_train, X_test = X[train_index], X[test_index] 
-    y_train, y_test = y[train_index], y[test_index]
-    #the close price on a test day
-    model = LogisticRegression(
-        penalty='none', solver='lbfgs', max_iter=10000).fit(X_train, y_train)
-    dummy = DummyClassifier().fit(X_train, y_train)
-    y_pred = model.predict(X_test)
-    y_pred_dummy = dummy.predict(X_test)
-    #show_confusion_matrix(y_test, y_pred)
-    #show_confusion_matrix(y_test, y_pred_dummy)
-    #KFold_validate_logistic(model, dummy, X, y)
-    #show_AUC_curve([model, dummy], ["Logistic", "Dummy"], X_test, y_test)
-    
-    (cash, dummyCash) = gamba(model, dummy, X, test_index, cash=1000, size=sz, max_days_to_trade = 300)
-    return (cash, dummyCash)
-
-def trade():
-    totalCash = []
-    totalDummyCash = []
-    days = 2
-    runs = 1000
-    (X, y, sz) = read_classifier(n_days=days)
-    for i in range(runs):
-        (cash, dummyCash) = run_regression(X, y, sz)
-        totalCash.append(cash)
-        totalDummyCash.append(dummyCash)
-
-    print("mean: ", np.array(totalCash).mean(), " std: ", np.array(totalCash).std())
-    print("mean: ", np.array(totalDummyCash).mean(), " std: ", np.array(totalDummyCash).std())
-
-def regression():
-    days = 2
-    (X, y, sz) = read_classifier(n_days=days)
-    run_regression(X, y, sz)
-
-
-trade()
-
+#C optimal value seems to be 1?
+#cvalues(2)
+aucGraph(1,1,2,1)
+# reports(1,1,2,1)
