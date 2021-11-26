@@ -1,6 +1,6 @@
 from sklearn.model_selection import KFold
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error, f1_score, roc_auc_score, roc_curve
+from sklearn.metrics import mean_squared_error, f1_score, roc_auc_score, roc_curve, confusion_matrix
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -37,3 +37,6 @@ def show_AUC_curve(models, labels, X_test, y_test):
     plt.plot([0, 1], [0, 1], color='green',linestyle='--')
     plt.legend(labels)
     plt.show()
+
+def show_confusion_matrix(y_true, y_pred):
+    print(confusion_matrix(y_true, y_pred))

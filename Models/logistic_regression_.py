@@ -131,6 +131,6 @@ def reports(c1,c2,day,q):
     print(classification_report(ytest,ypred4))
 
 #C optimal value seems to be 1?
-cvalues(2)
-# aucGraph(1,1,2,1)
+#cvalues(2)
+aucGraph(1,1,2,1)
 # reports(1,1,2,1)

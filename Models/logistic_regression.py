@@ -1,5 +1,5 @@
 from file_reader import read_classifier
-from utils import KFold_validate_logistic, show_AUC_curve
+from utils import KFold_validate_logistic, show_AUC_curve, show_confusion_matrix
 from sklearn.linear_model import LogisticRegression
 import numpy as np
 from sklearn.dummy import DummyClassifier
@@ -7,6 +7,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import KFold, ShuffleSplit
+from sklearn.neighbors import KNeighborsClassifier
 
 def gamba(model, dummy, X, X_test, cash=10000, size=1, max_days_to_trade=100):
     X_test = np.sort(X_test)
@@ -86,23 +87,35 @@ def run_regression(X, y, sz):
     model = LogisticRegression(
         penalty='none', solver='lbfgs', max_iter=10000).fit(X_train, y_train)
     dummy = DummyClassifier().fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    y_pred_dummy = dummy.predict(X_test)
+    #show_confusion_matrix(y_test, y_pred)
+    #show_confusion_matrix(y_test, y_pred_dummy)
     #KFold_validate_logistic(model, dummy, X, y)
     #show_AUC_curve([model, dummy], ["Logistic", "Dummy"], X_test, y_test)
+    
     (cash, dummyCash) = gamba(model, dummy, X, test_index, cash=1000, size=sz, max_days_to_trade = 300)
     return (cash, dummyCash)
 
+def trade():
+    totalCash = []
+    totalDummyCash = []
+    days = 2
+    runs = 1000
+    (X, y, sz) = read_classifier(n_days=days)
+    for i in range(runs):
+        (cash, dummyCash) = run_regression(X, y, sz)
+        totalCash.append(cash)
+        totalDummyCash.append(dummyCash)
 
-totalCash = 0
-totalDummyCash = 0
-days = 2
-runs = 500
-(X, y, sz) = read_classifier(n_days=days)
-for i in range(runs):
-    (cash, dummyCash) = run_regression(X, y, sz)
-    totalCash += cash
-    totalDummyCash += dummyCash
+    print("mean: ", np.array(totalCash).mean(), " std: ", np.array(totalCash).std())
+    print("mean: ", np.array(totalDummyCash).mean(), " std: ", np.array(totalDummyCash).std())
 
-print(totalCash/runs, totalDummyCash/runs)
+def regression():
+    days = 2
+    (X, y, sz) = read_classifier(n_days=days)
+    run_regression(X, y, sz)
 
 
+trade()
 
