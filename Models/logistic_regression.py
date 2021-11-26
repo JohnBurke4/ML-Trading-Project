@@ -96,13 +96,14 @@ def run_regression(X, y, sz):
 totalCash = 0
 totalDummyCash = 0
 days = 2
+runs = 500
 (X, y, sz) = read_classifier(n_days=days)
-for i in range(500):
+for i in range(runs):
     (cash, dummyCash) = run_regression(X, y, sz)
     totalCash += cash
     totalDummyCash += dummyCash
 
-print(totalCash/500, totalDummyCash/500)
+print(totalCash/runs, totalDummyCash/runs)
 
 
 
