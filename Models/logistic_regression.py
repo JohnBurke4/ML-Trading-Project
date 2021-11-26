@@ -25,7 +25,6 @@ def gamba(model, dummy, X, X_test, cash=10000, size=1, max_days_to_trade=100):
     
 
     dummyCash = cash
-    max_days_to_trade
     count = 0
     for x_t in X_test_day:
         count = count + 1
@@ -48,7 +47,7 @@ def gamba(model, dummy, X, X_test, cash=10000, size=1, max_days_to_trade=100):
 
         if(index < size):
             continue
-        prediction = model.predict(X[index].reshape(1, -1))[0]
+        prediction = buy
         dummyPrediction = dummy.predict(X[index].reshape(1, -1))[0]
 
         open_price = X[index, 2]
