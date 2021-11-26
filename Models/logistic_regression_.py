@@ -4,10 +4,10 @@ import numpy as np
 from sklearn.dummy import DummyClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import PolynomialFeatures
-from sklearn.model_selection import KFold
+from sklearn.model_selection import KFold,ShuffleSplit
 from matplotlib import pyplot as plt
 from sklearn.metrics import auc, confusion_matrix, classification_report, roc_curve
-
+from logistic_regression import gamba
 # Logisitic Regression -- different penalties 
 def cvalues(day):
     q_range = [1,2]
@@ -129,8 +129,29 @@ def reports(c1,c2,day,q):
     print("Baseline predictor: Uniform")
     print(confusion_matrix(ytest,ypred4))
     print(classification_report(ytest,ypred4))
+    return (logModel,logmodel2)
 
 #C optimal value seems to be 1?
-cvalues(2)
-# aucGraph(1,1,2,1)
+# (model1,model2) = reports(1,1,2,1)
+# totalCash = 0
+# totalDummyCash = 0
+# days = 2
+# runs = 500
+# (X, y, sz) = read_classifier(n_days=days)
+# data_size = X.shape[0]
+# cols = X.shape
+# X_indices = np.reshape(np.random.rand(data_size*2),(data_size,2))
+# y_indices = np.random.randint(2, size=data_size)
+# sss = ShuffleSplit(n_splits=1, test_size=0.2)
+# sss.get_n_splits(X, y)
+# train_index, test_index = next(sss.split(X_indices, y_indices)) 
+# X_train, X_test = X[train_index], X[test_index] 
+# y_train, y_test = y[train_index], y[test_index]
+# for i in range(runs):
+#     (cash, dummyCash) = gamba(model1,model2,X, test_index, cash=1000, size=sz, max_days_to_trade = 300)
+#     totalCash += cash
+#     totalDummyCash += dummyCash
+# print(totalCash/runs, totalDummyCash/runs)
+# cvalues(2)
+aucGraph(1,1,2,1)
 # reports(1,1,2,1)
