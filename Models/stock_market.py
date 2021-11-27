@@ -91,7 +91,7 @@ def run_regression(X, y, sz):
     y_pred_dummy = dummy.predict(X_test)
     #show_confusion_matrix(y_test, y_pred)
     #show_confusion_matrix(y_test, y_pred_dummy)
-    #KFold_validate_logistic(model, dummy, X, y)
+    KFold_validate_logistic(model, dummy, X, y)
     #show_AUC_curve([model, dummy], ["Logistic", "Dummy"], X_test, y_test)
     
     (cash, dummyCash) = gamba(model, dummy, X, test_index, cash=1000, size=sz, max_days_to_trade = 300)
@@ -117,5 +117,5 @@ def regression():
     run_regression(X, y, sz)
 
 
-trade()
+regression()
 
