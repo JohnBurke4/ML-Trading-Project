@@ -105,11 +105,11 @@ def aucGraph(c1,c2,c3,day,q):
     xtrain, xtest, ytrain, ytest = train_test_split(xpoly, y, test_size=0.2)
     model0 = LogisticRegression(penalty='none', solver='lbfgs',max_iter=10000).fit(xtrain,ytrain)
     model2 = LogisticRegression(
-                penalty='l1', solver='saga', dual=False,C=c1,max_iter=10000,l1_ratio=0.5).fit(xtrain,ytrain)
+                penalty='l1', solver='saga', dual=False,C=c1,max_iter=10000).fit(xtrain,ytrain)
     model3 = LogisticRegression(
                 penalty='l2', solver='lbfgs', dual=False,C=c2,max_iter=10000).fit(xtrain,ytrain)
     model1 = LogisticRegression(
-                penalty='elasticnet', solver='saga', dual=False,C=c3,max_iter=10000).fit(xtrain,ytrain)
+                penalty='elasticnet', solver='saga', dual=False,C=c3,max_iter=10000,l1_ratio=0.5).fit(xtrain,ytrain)
     ydummy = DummyClassifier(strategy="most_frequent").fit(xtrain,ytrain)
     ydummy2 = DummyClassifier(strategy="uniform").fit(xtrain,ytrain)
     fpr4, tpr4, _ = roc_curve(ytest,model1.decision_function(xtest))
@@ -174,6 +174,6 @@ def reports(c1,c2,c3,day,q):
     return (model0,model2,model3,model1)
 
 #C optimal value seems to be 1?
-cvalues(2)
-# aucGraph(1,1,1,2,1)
+# cvalues(2)
+aucGraph(1,1,1,2,1)
 # reports(1,1,1,2,1)
