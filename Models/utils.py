@@ -40,3 +40,10 @@ def show_AUC_curve(models, labels, X_test, y_test):
 
 def show_confusion_matrix(y_true, y_pred):
     print(confusion_matrix(y_true, y_pred))
+
+def kNN_graph(k_range, mean_error, std_error):
+    plt.errorbar(k_range,mean_error,yerr=std_error,linewidth=3)
+    plt.xlabel('k')
+    plt.ylabel("AUC")
+    plt.title("kNN")
+    plt.show()
