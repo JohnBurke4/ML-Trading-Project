@@ -9,7 +9,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import KFold, ShuffleSplit
 from sklearn.neighbors import KNeighborsClassifier
 
-def gamba(model, dummy, X, X_test, cash=10000, size=1, max_days_to_trade=100):
+def gamba(model, X, X_test, cash=10000, size=1, max_days_to_trade=100):
     X_test = np.sort(X_test)
     X_test_day = []
     cap = size
@@ -24,8 +24,6 @@ def gamba(model, dummy, X, X_test, cash=10000, size=1, max_days_to_trade=100):
     if(len(temp_arr) > 0):
         X_test_day.append(temp_arr)
     
-
-    dummyCash = cash
     count = 0
     for x_t in X_test_day:
         count = count + 1
@@ -49,7 +47,6 @@ def gamba(model, dummy, X, X_test, cash=10000, size=1, max_days_to_trade=100):
         if(index < size):
             continue
         prediction = buy
-        dummyPrediction = dummy.predict(X[index].reshape(1, -1))[0]
 
         open_price = X[index, 2]
         close_price = X[index-size, 6]
@@ -59,15 +56,10 @@ def gamba(model, dummy, X, X_test, cash=10000, size=1, max_days_to_trade=100):
         elif (prediction == -1  and cash > 0 ):
             cash = (1-price_delta) * cash  
 
-        if (dummyPrediction == 1  and cash > 0 ):
-            dummyCash = (price_delta+1) * dummyCash 
-        elif (dummyPrediction == -1  and cash > 0 ):
-            dummyCash = (1-price_delta) * dummyCash   
 
+    return cash
 
-    return (cash, dummyCash)
-
-def run_regression(X, y, sz):
+def run_regression(X, y, sz, model):
 
     poly = PolynomialFeatures(1)
     X = poly.fit_transform(X)
@@ -84,32 +76,33 @@ def run_regression(X, y, sz):
     X_train, X_test = X[train_index], X[test_index] 
     y_train, y_test = y[train_index], y[test_index]
     #the close price on a test day
-    model = LogisticRegression(
-        penalty='none', solver='lbfgs', max_iter=10000).fit(X_train, y_train)
-    dummy = DummyClassifier().fit(X_train, y_train)
-    y_pred = model.predict(X_test)
-    y_pred_dummy = dummy.predict(X_test)
-    #show_confusion_matrix(y_test, y_pred)
-    #show_confusion_matrix(y_test, y_pred_dummy)
-    KFold_validate_logistic(model, dummy, X, y)
-    #show_AUC_curve([model, dummy], ["Logistic", "Dummy"], X_test, y_test)
+    model.fit(X_train, y_train)
     
-    (cash, dummyCash) = gamba(model, dummy, X, test_index, cash=1000, size=sz, max_days_to_trade = 300)
-    return (cash, dummyCash)
+    cash = gamba(model, X, test_index, cash=1000, size=sz, max_days_to_trade = 300)
+    return cash
 
 def trade():
-    totalCash = []
-    totalDummyCash = []
+    model_names = ["logistic", "kNN-19", "most frequent"]
+    models = []
+    saved_cash = []
+    saved_std = []
+    models.append(LogisticRegression(solver="lbfgs", max_iter=10000))
+    models.append(LogisticRegression(penalty='l2', solver='lbfgs', dual=False,C=1,max_iter=10000))
+    #models.append(KNeighborsClassifier(n_neighbors=2,weights='uniform'))
+    #models.append(DummyClassifier(strategy="uniform"))
     days = 2
-    runs = 1000
+    runs = 2500
     (X, y, sz) = read_classifier(n_days=days)
-    for i in range(runs):
-        (cash, dummyCash) = run_regression(X, y, sz)
-        totalCash.append(cash)
-        totalDummyCash.append(dummyCash)
-
-    print("mean: ", np.array(totalCash).mean(), " std: ", np.array(totalCash).std())
-    print("mean: ", np.array(totalDummyCash).mean(), " std: ", np.array(totalDummyCash).std())
+    for model in models:  
+        totalCash = []
+        for i in range(runs):
+            print(i)
+            cash = run_regression(X, y, sz, model)
+            totalCash.append(cash)
+        saved_cash.append(np.array(totalCash).mean())
+        saved_std.append(np.array(totalCash).std())
+    for i in range (len(saved_cash)):
+        print(f"{model_names[i]} cash: {saved_cash[i]} std: {saved_std[i]}")
 
 def regression():
     days = 2
@@ -117,5 +110,5 @@ def regression():
     run_regression(X, y, sz)
 
 
-regression()
+trade()
 
