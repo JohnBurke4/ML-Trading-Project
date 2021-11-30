@@ -293,6 +293,6 @@ def reports(c1,c2,c3,day,q):
 #C optimal value seems to be 1?
 # cvalues(2)
 # aucGraph(1,1,1,2,1)
-# reports(1,1,1,2,1)
+reports(1,1,1,2,1)
 # f1score(2)
 # ratl1l2(2)
